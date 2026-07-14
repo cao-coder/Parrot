@@ -93,7 +93,7 @@ function runDemucsInWorker(left, right, progressEl) {
     let worker;
     try {
       // ?v= 는 캐시 무효화용. 워커 코드가 바뀌면 이 숫자를 올리세요.
-      worker = new Worker("js/stem/stemWorker.js?v=5", { type: "module" });
+      worker = new Worker("js/stem/stemWorker.js?v=6", { type: "module" });
     } catch (err) {
       reject(
         new Error(

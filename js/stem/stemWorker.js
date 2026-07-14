@@ -27,6 +27,9 @@ const DEMUCS_SESSION_OPTIONS = {
 let ortModule = null;
 let demucsModule = null;
 
+/** same-origin ORT — GitHub Pages 서브경로(/Parrot/)·루트 도메인 모두 동작 */
+const ORT_VENDOR_BASE = new URL("../../../vendor/ort/", import.meta.url);
+
 function detectThreadCount() {
   if (typeof self.crossOriginIsolated === "undefined" || !self.crossOriginIsolated) {
     return { count: 1, isolated: false };
@@ -54,8 +57,8 @@ async function loadLibrariesOnce() {
   }
 
   // WASM 전용 번들 — WebGPU 시도 없이 CPU 경로만 사용 (초기에 잘 되던 구성과 동일 계열)
-  ortModule = await import("/vendor/ort/ort.bundle.min.mjs");
-  ortModule.env.wasm.wasmPaths = "/vendor/ort/";
+  ortModule = await import(new URL("ort.bundle.min.mjs", ORT_VENDOR_BASE).href);
+  ortModule.env.wasm.wasmPaths = ORT_VENDOR_BASE.href;
 
   const threads = detectThreadCount();
   ortModule.env.wasm.numThreads = threads.count;
