@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>사운드 캔버스 — MP3 웨이브폼 시각화 · AI 스템 분리</title>
+  <meta
+    name="description"
+    content="MP3를 업로드해 실시간 웨이브폼으로 감상하고, Demucs AI로 vocals·bass·drums·other 스템을 분리해 보세요."
+  />
+  <meta name="application-name" content="사운드 캔버스" />
+  <meta name="theme-color" content="#4a6cf7" />
+  <link rel="canonical" href="https://soundcanvas.co.kr/" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="사운드 캔버스" />
+  <meta property="og:title" content="사운드 캔버스 — MP3 웨이브폼 시각화" />
+  <meta
+    property="og:description"
+    content="MP3 웨이브폼 시각화와 Demucs AI 스템 분리를 브라우저에서 바로 사용하세요."
+  />
+  <meta property="og:url" content="https://soundcanvas.co.kr/" />
+  <meta property="og:locale" content="ko_KR" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="사운드 캔버스 — soundcanvas.co.kr" />
+  <meta
+    name="twitter:description"
+    content="MP3 웨이브폼 시각화 · AI 스템 분리 웹 앱"
+  />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="manifest" href="/site.webmanifest" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Chiron+GoRound+TC:wght@200..900&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="theme-light">
+  <main class="app">
+    <header class="app-header">
+      <div class="app-brand">
+        <h1>사운드 캔버스</h1>
+        <p class="app-domain">soundcanvas.co.kr</p>
+      </div>
+      <div class="usage-help">
+        <button
+          type="button"
+          class="usage-help-trigger"
+          aria-expanded="false"
+          aria-label="사용법 가이드 열기"
+        >
+          🔎 사용법
+        </button>
+      </div>
+    </header>
+
+    <div class="layout-row" role="toolbar" aria-label="보기 및 스템 분리">
+      <button type="button" id="modeToggle" class="doodle-btn doodle-btn--secondary mode-toggle" aria-pressed="false">
+        Combined Mode (한 캔버스)
+      </button>
+      <button
+        type="button"
+        id="themeToggle"
+        class="doodle-btn doodle-btn--mode mode-toggle mode-toggle--to-dark"
+        aria-label="다크 모드로 전환"
+      >
+        <span class="mode-toggle__liquid" aria-hidden="true">
+          <svg
+            class="mode-toggle__liquid-svg"
+            viewBox="0 0 100 100"
+            preserveAspectRatio="none"
+            aria-hidden="true"
+          >
+            <path class="mode-toggle__liquid-shape" d="M 0 0 L 0 0 L 0 100 Z" />
+          </svg>
+        </span>
+        <span class="mode-toggle__label">다크 모드</span>
+      </button>
+      <div class="theme-picker" id="themePicker">
+        <button
+          type="button"
+          id="themePickerTrigger"
+          class="doodle-btn doodle-btn--picker theme-picker-trigger"
+          aria-haspopup="listbox"
+          aria-expanded="false"
+          aria-controls="themePickerMenu"
+          aria-label="컬러 테마 선택"
+        >
+          테마 |<span class="theme-picker-name">아케이드 팝</span>▼
+        </button>
+        <ul
+          id="themePickerMenu"
+          class="theme-picker-menu"
+          role="listbox"
+          aria-label="테마 목록"
+          aria-hidden="true"
+        >
+          <li role="option" data-theme-id="arcade-pop" tabindex="0">아케이드 팝</li>
+          <li role="option" data-theme-id="cozy-lofi" tabindex="0">코지 로파이</li>
+          <li role="option" data-theme-id="rhythm-express" tabindex="0">리듬 익스프레스</li>
+        </ul>
+      </div>
+      <button
+        type="button"
+        id="stemSeparateBtn"
+        class="doodle-btn doodle-btn--primary stem-btn"
+        aria-label="선택한 MP3를 Demucs로 네 스템 분리"
+      >
+        AI 스템 분리 (Demucs)
+      </button>
+      <button
+        type="button"
+        id="recordBtn"
+        class="doodle-btn doodle-btn--record"
+        aria-label="녹화 시작"
+      >
+        <span class="record-dot record-dot--idle" aria-hidden="true">●</span> 녹화 시작
+      </button>
+      <label class="export-quality-label" for="exportQuality">
+        <span class="visually-hidden">WebM보내기 품질</span>
+        <select id="exportQuality" class="export-quality" aria-label="WebM보내기 품질">
+          <option value="fast">빠름 (720p 30fps)</option>
+          <option value="default" selected>기본 (1080p 60fps)</option>
+          <option value="high">고품질 (1440p 60fps)</option>
+        </select>
+      </label>
+      <button
+        type="button"
+        id="exportBtn"
+        class="doodle-btn doodle-btn--export"
+        aria-label="WebM 저장"
+      >
+        ⬇ WebM 저장
+      </button>
+      <label class="library-save-mode-label" for="librarySaveMode">
+        <span class="visually-hidden">보관함 저장 방식</span>
+        <select id="librarySaveMode" class="library-save-mode" aria-label="보관함 저장 방식">
+          <option value="original">원본만 저장</option>
+          <option value="with-stems">스템 포함 저장</option>
+        </select>
+      </label>
+      <button
+        type="button"
+        id="librarySaveBtn"
+        class="doodle-btn doodle-btn--library-save"
+        aria-label="보관함에 저장"
+      >
+        보관함에 저장
+      </button>
+      <span id="librarySaveStatus" class="library-save-status" hidden aria-live="polite"></span>
+      <span id="exportProgress" class="export-progress" hidden aria-live="polite"></span>
+      <span id="recordStatus" class="record-status" hidden aria-live="polite"></span>
+      <span id="stemProgress" class="stem-progress" hidden aria-live="polite"></span>
+    </div>
+
+    <div class="controls">
+      <div class="controls-left">
+        <label class="file-label">
+          <span class="file-label-text">MP3 파일 선택</span>
+          <input
+            id="fileInput"
+            type="file"
+            accept=".mp3,audio/mpeg"
+            aria-label="MP3 파일 업로드"
+          />
+        </label>
+        <span
+          id="selectedFileName"
+          class="selected-file-name"
+          aria-live="polite"
+        ></span>
+      </div>
+    </div>
+
+    <div
+      class="player-bar"
+      id="playerBar"
+      role="group"
+      aria-label="오디오 재생"
+    >
+      <button
+        type="button"
+        id="playButton"
+        class="player-play-btn"
+        aria-label="재생"
+        disabled
+      >
+        <span class="player-play-icon" aria-hidden="true"></span>
+      </button>
+      <input
+        id="seekSlider"
+        class="player-seek"
+        type="range"
+        min="0"
+        max="100"
+        value="0"
+        step="0.1"
+        disabled
+        aria-label="재생 위치"
+        aria-valuemin="0"
+        aria-valuemax="100"
+        aria-valuenow="0"
+      />
+      <span class="player-time" aria-live="off">
+        <span id="timeCurrent">0:00</span>
+        <span class="player-time-sep" aria-hidden="true">/</span>
+        <span id="timeDuration">0:00</span>
+      </span>
+    </div>
+
+    <div id="combinedWrap" class="viz-wrap">
+      <canvas
+        id="waveCanvas"
+        width="800"
+        height="240"
+        aria-label="한 캔버스 겹침 모드 파형"
+      ></canvas>
+    </div>
+
+    <div id="splitWrap" class="split-grid" hidden>
+      <div id="instrumentToggles" class="inst-toggle-row" aria-label="악기 표시"></div>
+      <div id="splitGridInner">
+        <div id="inst-slot-vocals" class="inst-slot" data-instrument-id="vocals">
+          <span class="inst-label">Vocals</span>
+          <canvas data-instrument="vocals" width="480" height="168" aria-label="Vocals 파형"></canvas>
+        </div>
+        <div id="inst-slot-bass" class="inst-slot" data-instrument-id="bass">
+          <span class="inst-label">Bass</span>
+          <canvas data-instrument="bass" aria-label="Bass 파형"></canvas>
+        </div>
+        <div id="inst-slot-drums" class="inst-slot" data-instrument-id="drums">
+          <span class="inst-label">Drums</span>
+          <canvas data-instrument="drums" aria-label="Drums 파형"></canvas>
+        </div>
+        <div id="inst-slot-other" class="inst-slot" data-instrument-id="other">
+          <span class="inst-label">Other</span>
+          <canvas data-instrument="other" aria-label="Other 파형"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <footer class="app-footer">
+      <p>
+        <span class="app-footer-name">사운드 캔버스</span>
+        ·
+        <a href="https://soundcanvas.co.kr/" class="app-footer-link">soundcanvas.co.kr</a>
+      </p>
+    </footer>
+  </main>
+
+  <script src="js/config/siteConfig.js"></script>
+  <script src="js/config/themeConfig.js"></script>
+  <script src="js/config/instruments.js"></script>
+  <script src="js/ui/library.js"></script>
+  <script src="js/audio/audio.js"></script>
+  <script src="js/audio/audioProcessor.js"></script>
+  <script src="js/visual/visualizer.js"></script>
+  <script src="js/ui/ui.js"></script>
+  <script src="js/audio/recorder.js"></script>
+  <script src="js/export/exportBridge.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/ui/libraryPanel.js"></script>
+  <script src="js/ui/usageGuide.js"></script>
+  <!-- 일반 스크립트: file:// 로 열어도 모듈 제한 없이 runDemucsSeparation 등록 -->
+  <script src="js/stem/stemBridge.js"></script>
+</body>
+</html>

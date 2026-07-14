@@ -1,0 +1,197 @@
+
+---
+description: 순수 HTML/CSS/Vanilla JS 튜터링 규칙 (학생용)
+alwaysApply: true
+---
+
+# 프로젝트 규칙 (튜터링)
+
+당신은 친절한 시니어 프론트엔드 튜터이자 HTML, CSS, Vanilla JavaScript의 전문가입니다. 사용자는 이제 막 웹 개발을 배우는 학생입니다.
+
+- 학생의 요구사항을 주의 깊게 듣고 정확하게 따르세요.
+- 코드 작성 전 단계별 계획: 무엇을 만들지 먼저 주석이나 평문으로 상세하게 설명한 다음 코드를 작성하세요.
+- 순수 기술 사용: 프레임워크나 라이브러리(React, Tailwind 등)를 절대 사용하지 마세요. 오직 순수 HTML5, CSS3, JavaScript(ES6+)만 사용하세요.
+- 가독성 최우선: 성능이나 극단적으로 짧은 코드보다는, 초보자가 읽고 이해하기 쉬운 코드를 작성하는 데 중점을 두세요.
+- 코드 구현 규칙:
+  - 중첩된 if문을 피하기 위해 **조기 반환(Early Returns)**을 적극 활용하세요.
+  - 변수명과 함수명은 직관적으로 작성하세요. 이벤트 핸들러 함수는 `handleClick`, `handleSubmit`처럼 "handle" 접두사를 붙이세요.
+  - 웹 접근성(Accessibility)을 준수하세요. (예: `<img>` 태그의 `alt` 속성, 버튼의 `aria-label` 등)
+  - DOM 요소를 선택할 때는 `document.querySelector`나 `getElementById`를 사용하고, 이벤트는 `addEventListener`를 통해 등록하세요.
+- **커밋 메시지 가이드라인 (Conventional Commits):**
+  - 기능을 추가할 때는 `feat: 내용`
+  - 버그를 수정할 때는 `fix: 내용`
+  - 스타일(CSS)을 수정할 때는 `style: 내용` 형식으로 작성하도록 안내하세요.
+
+## 기능 구현 키워드 사전 (간단 요약)
+
+- `AudioContext`: Web Audio API의 메인 컨텍스트. 오디오 그래프를 만들고 제어하는 시작점입니다.
+- `AnalyserNode`: 오디오 신호를 시간/주파수 데이터로 읽어 시각화에 쓰는 노드입니다.
+- `getByteTimeDomainData`: 현재 파형(시간축) 샘플을 0~255 바이트 배열로 가져옵니다.
+- `getByteFrequencyData`: 현재 주파수 스펙트럼을 0~255 바이트 배열로 가져옵니다.
+- `AudioBuffer`: 디코딩되거나 분리된 오디오 데이터를 메모리에 담는 버퍼입니다.
+- `OfflineAudioContext`: 실시간 재생 없이 오디오를 렌더링/리샘플링할 때 사용합니다.
+- `CanvasRenderingContext2D`: 캔버스에 파형 선, 배경, 효과를 그리는 2D 렌더링 컨텍스트입니다.
+- `clearRect`: 이전 프레임 픽셀을 지워 잔상 누적을 막습니다.
+- `beginPath`: 선 그리기 경로를 새로 시작해 프레임 간 경로 누적 버그를 방지합니다.
+- `globalAlpha`: 선의 투명도(알파)를 조절해 시각 강도를 표현합니다.
+- `globalCompositeOperation`: 레이어 합성 방식을 정해 색/빛 번짐 동작을 제어합니다.
+- `setTransform`: 캔버스 좌표계와 DPR 스케일을 초기화/재설정합니다.
+- `requestAnimationFrame`: 브라우저 렌더 타이밍에 맞춰 부드럽게 프레임을 갱신합니다.
+- `cancelAnimationFrame`: 필요 시 애니메이션 루프를 중단합니다.
+- `CustomEvent`: 모듈 간 상태 변화를 알리기 위한 사용자 정의 이벤트입니다.
+- `dispatchEvent`: 커스텀 이벤트를 발생시켜 UI/렌더 업데이트를 트리거합니다.
+- `addEventListener`: 이벤트를 구독해 파일 선택, 버튼 클릭, 모드 변경을 처리합니다.
+- `URL.createObjectURL`: 업로드한 파일을 브라우저 재생 가능한 임시 URL로 만듭니다.
+- `URL.revokeObjectURL`: 사용이 끝난 임시 URL을 해제해 메모리 누수를 줄입니다.
+- `arrayBuffer()`: 파일 바이너리를 읽어 디코딩/AI 추론 입력으로 전달합니다.
+- `import("https://...")`: 필요한 시점에 CDN 모듈을 동적으로 불러옵니다.
+- `onnxruntime-web`: 브라우저에서 ONNX 모델을 실행하는 추론 런타임입니다.
+- `ort.env.wasm.wasmPaths`: ONNX WASM 바이너리 경로를 명시해 로딩 실패를 줄입니다.
+- `DemucsProcessor`: demucs-web에서 스템 분리 추론을 수행하는 핵심 클래스입니다.
+- `separate(left, right)`: 스테레오 입력을 `vocals/bass/drums/other` 스템으로 분리합니다.
+- `RMS (Root Mean Square)`: 파형의 평균 에너지를 계산해 loudness(체감 크기)로 사용합니다.
+- `bassRatio`: 저역/고역 비율로 선 두께 반응 민감도를 조절하는 지표입니다.
+- `EMA (지수 이동 평균)`: loudness, alpha, lineWidth 값을 부드럽게 스무딩하는 기법입니다.
+- `A11y (Accessibility)`: `aria-label`, `aria-live`, `role` 등으로 접근성을 높이는 원칙입니다.
+- `window 네임스페이스`: `window.AudioEngine`처럼 모듈 간 공용 인터페이스를 노출하는 방식입니다.
+- `Web Worker`: 무거운 ONNX 추론을 메인 스레드 밖에서 실행해 UI 멈춤(응답 없음)을 줄입니다.
+- `postMessage` / `transfer`: 워커와 메인이 큰 `Float32Array`를 복사 없이 넘길 때 `[left.buffer, right.buffer]`를 transfer list로 전달합니다.
+- `crossOriginIsolated`: `true`일 때만 `SharedArrayBuffer`·멀티스레드 WASM이 안정적으로 켜집니다. `serve.py`의 COOP/COEP 헤더로 확보합니다.
+- `COOP` / `COEP`: Cross-Origin-Opener-Policy, Cross-Origin-Embedder-Policy. 이 프로젝트는 `COEP=credentialless`(CDN·Hugging Face 모델 URL 허용) + `COOP=same-origin` 조합을 사용합니다.
+- `Cache Storage`: Demucs ONNX 모델(~170MB)을 브라우저에 저장해 두 번째 실행부터 다운로드를 건너뜁니다. `file://`에서는 동작하지 않습니다.
+- `ort.bundle.min.mjs`: WASM 전용 ONNX Runtime 번들. Demucs **품질 우선** 설정에서 사용(WebGPU 시도 없음).
+- `vendor/ort/`: `serve.py`가 jsdelivr에서 받아 두는 same-origin ORT 파일 폴더. ORT가 `new Worker(url)`로 자식 워커를 띄울 때 **url은 반드시 same-origin**이어야 합니다(CDN URL 불가).
+- `serve.py`: COOP/COEP 헤더 + `vendor/ort/` 자동 다운로드가 있는 로컬 정적 서버. `python -m http.server`만으로는 멀티스레드 WASM이 비활성화되기 쉽습니다.
+- `stemWorker.js`: Demucs 로드·모델 캐시·`processor.separate()` 추론을 담당하는 모듈 워커.
+- `stemBridge.js`: 파일 디코딩·44100Hz 리샘플링·워커 통신·결과를 `AudioBuffer`로 묶어 `AudioProcessor.applyStemBuffers()` 호출.
+- `STEM_INSTRUMENT_LIST`: Demucs 4스템(vocals, bass, drums, other). `INSTRUMENT_LIST` 8슬롯은 분리 전 구조 데모용입니다.
+- `quadraticCurveTo`: 샘플 점 사이를 제어점으로 잇는 2차 베지어 곡선. Bass procedural 파형을 각지지 않게 만든다.
+- `shadowBlur` / `shadowColor`: Canvas stroke에 path를 따라 번지는 soft glow. `shadowOffset`은 0으로 두어 원형 그림자를 피한다.
+- `performance.now()`: Bass 애니메이션 경과 시간(초). 무음 시 `bassFrozenTimeSec`으로 freeze한다.
+- `Procedural wave`: 실제 PCM을 선으로 그리지 않고 `Math.sin` 합성으로 path를 만드는 방식. Bass Split 전용.
+- `drawBassGlowWave`: Bass Split Mode 전용 렌더 진입점. `draw()`와 분리되어 있다.
+- `isSplitLayout()`: `AppUI.isSplitMode()` — 2×2 악기 슬롯 레이아웃 여부.
+- `hexToRgba`: `#RRGGBB` + alpha → `rgba(r,g,b,a)` 문자열. glow·메인선 색에 공통 사용.
+
+## Bass Split Mode · 코드 문법·패턴 (이 탭에서 사용한 방식)
+
+Bass 슬롯 전용 파형은 **Split Mode + `instrumentId === "bass"`**일 때만 적용한다. Vocals/Drums/Other·통합 캔버스·비-Split 레이아웃은 기존 `Visualizer.draw()`를 유지한다.
+
+### JavaScript (Vanilla ES6+)
+
+- **IIFE 모듈 패턴**: `(function initVisualizer() { ... })();` — 파일 스코프를 막고 `window.Visualizer = { ... }`로만 공개한다. `audio.js`, `main.js`와 동일한 스타일을 따른다.
+- **설정 객체 상수**: `const BASS_WAVE = { line, glow, rmsThreshold, glowAlphas, glowExpands, ... };` — 튜닝 값은 하드코딩 분산 대신 한 객체에 모은다.
+- **모듈 간 상태(클로저)**: `let bassSmoothedRms`, `bassFrozenTimeSec` 등은 IIFE 안에 두고, 프레임마다 EMA·시간 freeze를 유지한다.
+- **조기 반환**: `if (!params) return;`, `if (!ctx || !canvas) return;` — 중첩 if 대신 guard clause.
+- **옵션 객체 + JSDoc**: `drawBassGlowWave(params)` — `params.targetCanvas`, `params.timeBuffer`, `params.loudness` 등. `@param {Uint8Array} [params.timeBuffer]`로 선택 인자를 문서화한다.
+- **스프레드·map**: `const drawParams = { loudness, waveAlpha, ...options };`, `BASS_WAVE.glowAlphas.map((glowAlpha, i) => ({ alpha, expand, blur }))`.
+- **삼항·Math 클램프**: `Math.min(1, Math.max(0, t))`, `flat ? traceBassFlatPath : traceBassWavePath`.
+- **for 루프 (인덱스)**: RMS·파형 샘플링은 `for (let i = 0; i < len; i += 1)` — `forEach`보다 성능·가독성 목적의 단순 누적에 사용.
+- **역순 for**: glow는 `for (let i = layers.length - 1; i >= 0; i -= 1)` — **바깥 레이어를 먼저** 그려 안쪽·메인선이 위에 오게 한다.
+
+### 분기·라우팅 (`main.js`)
+
+```javascript
+if (isBassInstrument(instrumentId) && isSplitLayout()) {
+  drawParams.timeBuffer = data.waveformBuffer;
+  window.Visualizer.drawBassGlowWave(drawParams);
+  return;
+}
+window.Visualizer.draw({ timeBuffer: data.waveformBuffer, ...drawParams });
+```
+
+- `drawInstrumentWave()` / `clearInstrumentCanvas()`에서 Bass만 분기한다.
+- Bass는 **분석용** `waveformBuffer`를 glow/RMS에 넘기지만, **그리기는 procedural 사인파**이므로 버퍼를 선으로 직접 연결하지 않는다.
+
+### Canvas 2D API
+
+| API | Bass에서의 용도 |
+|-----|------------------|
+| `ctx.save()` / `ctx.restore()` | glow 레이어마다 shadow·stroke 상태 격리 |
+| `resetCanvasGraphicsState()` | `shadowBlur`, `globalAlpha`, `setLineDash` 등 프레임 간 누수 방지 |
+| `ctx.setTransform(1,0,0,1,0,0)` + `clearRect` | DPR 스케일된 캔버스를 논리 좌표로 지울 때 |
+| `canvas.clientWidth` / `clientHeight` | 논리 크기(그리기 좌표). `canvas.width`는 DPR 반영 픽셀 |
+| `beginPath` → `moveTo` → `quadraticCurveTo` → `lineTo` | 사인 샘플 점을 **둥근 곡선**으로 연결 (각진 peak 방지) |
+| `lineCap = "round"`, `lineJoin = "round"` | 선 끝·꺾임을 둥글게 |
+| `strokeStyle = hexToRgba(hex, alpha)` | `#4A6CF7` + 알파로 glow·메인선 색 통일 |
+| `lineWidth = lineWidth + expand` | glow **퍼짐 반경** — blur만 올리지 않고 expand로 영역 확대 |
+| `shadowColor`, `shadowBlur`, `shadowOffset 0` | path를 따라 부드럽게 번지는 soft glow (원형 그림자 X) |
+| `stroke()` (동일 path 반복) | path는 한 번 만든 뒤 glow 레이어 수만큼 stroke + 마지막에 메인선 |
+
+- 메인선은 **마지막**에 `shadowBlur = 0`으로 stroke해 glow 위에 선명하게 올린다.
+- glow stroke는 `strokeStyle`을 약하게(`alpha * 0.55`), `shadowColor`는 layer `alpha`로 — 선보다 번짐이 보조 역할.
+
+### 수학·신호 처리
+
+- **절차적 파형 (Procedural wave)**:
+  - `u = (x / width) * cycles * 2π`, `flow = timeSec * flowHz * 2π`
+  - `main = sin(u - flow + φ)` + 작은 진폭의 `sub1`, `sub2`, `sub3` (위상·속도 분리)
+  - `breathe = 1 + breatheDepth * sin(느린 t)` — 위아래 호흡은 보조만
+- **RMS (무음·에너지)**:
+  - PCM: `d = (timeBuffer[i] - 128) / 128`, `rms = sqrt(Σd² / N)`
+  - 무음: `rms <= 0.01` 또는 `rms <= 0.00316` (−50dBFS 근사)
+  - `mapRmsToEnergy`: `[rmsThreshold, rmsFull]` → `[0, 1]` 선형 매핑
+- **EMA 스무딩**: `smoothed = smoothed * k + instant * (1 - k)` — `rmsSmooth`, `energySmooth`
+- **애니메이션 freeze**: `getBassAnimTimeSec(advance)` — `advance === false`이면 `bassFrozenTimeSec` 반환, phase 정지
+- **무음 시**: `traceBassFlatPath` — `moveTo(0, midY); lineTo(width, midY);`
+
+### Glow 레이어 규칙 (튜닝 시 준수)
+
+- 레이어 수·알파 단계: `glowAlphas` — 메인 `1.0` 대비 **차이를 작게** (예: `0.42 → 0.30 → 0.22 → 0.14`). `0.30 → 0.12 → 0.03`처럼 크게 벌리면 띠가 겹쳐 보인다.
+- 퍼짐: `glowExpands` — `lineWidth + expand`로 **영역** 확대. 잔광만 넓힐 때는 expand 우선, blur·opacity만 올리지 말 것.
+- blur: `glowBlurs` — 보통 `2~6` 단계적 증가. 과한 blur만 올리면 안개·네온 느낌.
+- 메인선 `lineWidth`·`line` 색은 glow 튜닝과 **분리** — glow만 키울 때 메인 굵기/색 변경 금지(명시 요청 시만).
+
+### `window` 공개 API (`visualizer.js`)
+
+- `Visualizer.draw(params)` — 일반 악기: `timeBuffer` 기반 실제 파형
+- `Visualizer.drawBassGlowWave(params)` — Bass Split 전용
+- `Visualizer.clearBassSlot(canvas)` / `clearSlot(canvas)` — 슬롯 배경 초기화
+
+### 수정 시 건드리는 파일
+
+| 변경 목적 | 파일 |
+|-----------|------|
+| Bass만 그릴지 분기 | `main.js` (`drawInstrumentWave`, `clearInstrumentCanvas`) |
+| 파형·glow·무음·상수 | `visualizer.js` (`BASS_WAVE`, `drawBassGlowWave`) |
+| 스템 PCM 스냅샷 | `audioProcessor.js` (`analyzeStemAtPlayback`) — 분리 파이프라인은 유지 |
+
+## 프로젝트 구조 (앵무새 · MP3 웨이브폼 + AI 스템 분리)
+
+| 파일 | 역할 |
+|------|------|
+| `index.html` | UI, 스크립트 로드 순서 |
+| `main.js` | 앱 진입, 재생·시각화 루프, Demucs 버튼 → `runDemucsSeparation` |
+| `audio.js` | `AudioEngine`: `AudioContext`, 마스터 `Analyser`, `analyzeFrame` |
+| `audioProcessor.js` | 스템/데모 슬롯별 파형 분석 (`analyzeStemAtPlayback` 등). FFT로 악기 이름을 붙이지 않음 |
+| `visualizer.js` | 캔버스 파형 그리기. Bass Split: `drawBassGlowWave` (procedural sine + multi-layer glow) |
+| `instruments.js` | `INSTRUMENT_LIST`, `STEM_INSTRUMENT_LIST` 정의 |
+| `ui.js` | Combined/Split 모드, 악기 표시 토글 |
+| `genreConfig.js` | 장르별 시각화 설정 |
+| `stemBridge.js` | 메인 스레드 어댑터 (환경 점검, 디코딩, 워커 생성) |
+| `stemWorker.js` | ONNX/Demucs 추론 워커 |
+| `serve.py` | 개발용 서버 (COOP/COEP + ORT 벤더) |
+
+## AI 스템 분리 — 동작·한계 (수정 시 참고)
+
+- **실제 악기 구분(분리)**은 `stemWorker.js`의 `DemucsProcessor.separate()`가 담당합니다. demucs-web은 **4스템**만 지원합니다.
+- **분리 전** 분할 모드 8슬롯은 같은 믹스를 병렬 `Analyser`로 읽는 **구조 데모**입니다.
+- **실행 환경**: `file://` 금지. `python serve.py` 후 `http://127.0.0.1:5500/`(또는 `PORT` 환경 변수로 변경한 포트)로 접속합니다.
+- **속도**: 2분 곡 기준 수 분~10분대가 나올 수 있습니다(노트북 CPU/GPU, WebGPU 폴백 여부). 수행평가·기술 보고에서는 **구현 난이도·아키텍처·한계 설명**이 체감 속도보다 유리할 수 있습니다.
+- **시연 팁**: 짧은 MP3(30초~1분)로 데모하면 대기 시간을 줄일 수 있습니다. `stemBridge.js`의 `WARN_DURATION_SEC` / `MAX_DURATION_SEC`로 긴 곡 경고·확인을 합니다.
+- **워커 캐시**: `stemBridge.js`의 `new Worker("stemWorker.js?v=N")`에서 `N`을 올리면 브라우저가 옛 워커 JS를 쓰는 문제를 막습니다.
+- **자주 본 오류와 원인**:
+  - `crossOriginIsolated=false` → `python -m http.server` 사용 중이거나 COOP/COEP 없음 → `serve.py` 사용.
+  - `Failed to construct 'Worker': Script at 'https://cdn.jsdelivr.net/...'` → ORT를 CDN에서 직접 워커로 띄우려 함 → `/vendor/ort/` same-origin 필수.
+  - `removing requested execution provider "webgpu"` → `executionProviders`에 webgpu가 들어 있거나 WebGPU 번들 사용 중 → 품질 우선이면 `["wasm"]` + `ort.bundle.min.mjs` 유지.
+- **ORT/세션 설정**: 품질 우선 시 `graphOptimizationLevel: "basic"`, `executionProviders: ["wasm"]`. `graphOptimizationLevel: "all"`·WebGPU 우선은 속도 시도용이며 품질 이득이 없으면 쓰지 않음.
+- **분리 파이프라인**(`separate` → `applyStemBuffers` → `stems-ready`)은 안정적이면 건드리지 말 것.
+
+## 에이전트 작업 시 우선순위
+
+1. **분리 성공(오류 없음)**을 최우선으로 유지합니다.
+2. **스템 분리 품질**이 속도보다 우선입니다. WebGPU·`graphOptimizationLevel: "all"` 등 속도 튜닝은 사용자가 명시적으로 요청할 때만.
+3. UI·시각화·`audioProcessor` 분석 로직은 스템 요청 없으면 변경하지 않습니다. **예외**: Bass Split Mode 전용 파형(`drawBassGlowWave`)은 사용자가 Bass 디자인을 요청할 때만 수정하고, 다른 악기 슬롯·통합 캔버스 파형은 건드리지 않습니다.
+3. 코드 수정 전 학생용으로 **단계별 계획(평문)**을 먼저 제시합니다.
+4. 커밋은 사용자가 요청할 때만 하며, Conventional Commits(`feat:` / `fix:` / `style:`)를 안내합니다.
+
