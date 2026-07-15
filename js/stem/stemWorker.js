@@ -56,9 +56,12 @@ async function loadLibrariesOnce() {
     return;
   }
 
-  // WASM 전용 번들 — WebGPU 시도 없이 CPU 경로만 사용 (초기에 잘 되던 구성과 동일 계열)
-  ortModule = await import(new URL("ort.bundle.min.mjs", ORT_VENDOR_BASE).href);
-  ortModule.env.wasm.wasmPaths = ORT_VENDOR_BASE.href;
+  // 🔥 [수정] 깃허브 페이지 경로(/Parrot/)가 깨지지 않도록 현재 워커 위치 기준으로 경로를 재계산합니다.
+  const correctedBase = new URL("../../vendor/ort/", self.location.href);
+
+  // WASM 전용 번들 — WebGPU 시도 없이 CPU 경로만 사용 (ORT_VENDOR_BASE 대신 correctedBase 사용)
+  ortModule = await import(new URL("ort.bundle.min.mjs", correctedBase).href);
+  ortModule.env.wasm.wasmPaths = correctedBase.href; // .wasm 파일 경로도 함께 수정됩니다.
 
   const threads = detectThreadCount();
   ortModule.env.wasm.numThreads = threads.count;
